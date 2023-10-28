@@ -24,9 +24,8 @@ jobs:
         with:
           go-version: "1.21"
 
-      - name: Build
-        run: go build -v ./...
-
-      - name: Run tests
+      - name: Build and Test
+        working-directory: ./server # Specify the directory where you want to run the commands
         run: |
+          go build -v ./...
           go test -v ./...

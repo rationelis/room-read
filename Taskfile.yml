@@ -4,8 +4,10 @@ version: "3"
 
 tasks:
   run:
+    dir: server
     cmds:
       - go run cmd/room-read/room_read.go
   test:
+    dir: server
     cmds:
       - go test -v ./...
