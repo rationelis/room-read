@@ -1,5 +1,0 @@
-environment: development
-
-server:
-  host: localhost
-  port: 4444
