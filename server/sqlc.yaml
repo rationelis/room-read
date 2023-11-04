@@ -1,0 +1,12 @@
+version: "2"
+
+sql:
+  - engine: "sqlite"
+    queries: "internal/adapters/database/queries/query.sql"
+    schema: "migrations"
+    gen:
+      go:
+        # https://github.com/sqlc-dev/sqlc/blob/main/docs/reference/config.md?plain=1#L127C4-L127C26
+        emit_exact_table_names: true
+        package: "database"
+        out: "internal/adapters/database"

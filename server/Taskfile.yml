@@ -1,0 +1,21 @@
+# https://taskfile.dev
+
+version: "3"
+
+tasks:
+  run:
+    cmds:
+      - go run cmd/room-read/room_read.go
+  db-start:
+    cmds:
+      - docker-compose -f docker/docker-compose.yml up -d
+  db-stop:
+    cmds:
+      - docker-compose -f docker/docker-compose.yml down
+  test:
+    cmds:
+      - go test -v ./...
+  generate:
+    dir: docker/sqlc
+    cmds:
+      - sh ./sqlc_generate.sh

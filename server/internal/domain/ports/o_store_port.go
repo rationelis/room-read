@@ -1,7 +1,10 @@
 package ports
 
-import "room_read/internal/domain/model"
+import (
+	"context"
+	"room_read/internal/domain/model"
+)
 
 type StorePort interface {
-	StoreMessage(message model.Message) error
+	StoreMessage(ctx context.Context, message *model.Message) (*model.Message, error)
 }

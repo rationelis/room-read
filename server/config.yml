@@ -1,0 +1,10 @@
+mqtt:
+  host: 127.0.0.1
+  port: 1883
+
+database:
+  path: "internal/adapters/database/database.db"
+
+logging:
+  level: debug
+  prettyPrint: true

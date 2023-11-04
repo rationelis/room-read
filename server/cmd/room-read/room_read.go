@@ -2,43 +2,44 @@ package main
 
 import (
 	"context"
+	"errors"
+	"fmt"
+	"log/slog"
 	"os"
 	"os/signal"
 	"room_read/internal/infrastructure/configuration"
+	"room_read/internal/infrastructure/logging"
 	"room_read/internal/infrastructure/server"
 	"sync"
 	"syscall"
 	"time"
-
-	"github.com/rs/zerolog/log"
 )
 
 type operation func(ctx context.Context) error
 
 func main() {
-	log.Info().Msg("Starting room-read service")
+	ctx := context.Background()
 
-	_, err := configuration.CreateConfiguration()
+	slog.Info("Starting room-read service")
+
+	configuration, err := configuration.CreateConfiguration()
 
 	if err != nil {
-		log.Fatal().Err(err).Msg("Could not create configuration")
+		logging.WithError(ctx, errors.Join(errors.New("Could not create configuration"), err))
 		os.Exit(1)
 	}
 
-	log.Info().Msg("Starting MQTT server")
+	slog.Info("Starting MQTT server")
 
-	s, err := server.NewRoomReadServer()
+	s, err := server.NewRoomReadServer(configuration)
 
 	if err != nil {
-		log.Fatal().Err(err).Msg("Could not create MQTT server")
+		logging.WithError(ctx, errors.Join(errors.New("Could not create MQTT server"), err))
 		os.Exit(1)
 	}
 
 	go func() {
 		err = s.Start()
-		// if errors.Is(err, http.ErrServerClosed) {
-		// 	log.Info().Msg("MQTT server stopped")
-		// }
 	}()
 
 	wait := gracefulShutdown(context.Background(), 5*time.Second, map[string]operation{
@@ -57,10 +58,10 @@ func gracefulShutdown(ctx context.Context, timeout time.Duration, ops map[string
 		signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP, syscall.SIGKILL)
 		<-signalChan
 
-		log.Info().Msg("Shutting down server")
+		logging.Info(ctx, "Shutting down server")
 
 		timeoutFunc := time.AfterFunc(timeout, func() {
-			log.Error().Msgf("Timeout of %d ms has elapsed, force exit", timeout.Milliseconds())
+			logging.Error(ctx, fmt.Sprintf("Timeout of %d ms has elapsed, force exit", timeout.Milliseconds()))
 			os.Exit(0)
 		})
 		defer timeoutFunc.Stop()
@@ -71,12 +72,12 @@ func gracefulShutdown(ctx context.Context, timeout time.Duration, ops map[string
 			wg.Add(1)
 			go func(key string, op operation) {
 				defer wg.Done()
-				log.Info().Msgf("Shutting down: %s", key)
+				logging.Info(ctx, fmt.Sprintf("Shutting down: %s", key))
 				if err := op(ctx); err != nil {
-					log.Error().Err(err).Msgf("%s: Cleanup failed", key)
+					logging.Error(ctx, fmt.Sprintf("%s: Cleanup failed", key))
 					return
 				}
-				log.Info().Msgf("%s was shut down gracefully", key)
+				logging.Info(ctx, fmt.Sprintf("%s was shut down gracefully", key))
 			}(key, op)
 		}
 
