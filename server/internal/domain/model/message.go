@@ -10,7 +10,7 @@ import (
 type Message struct {
 	ClientID  string
 	Topic     string
-	Payload   string
+	Payload   []byte
 	Timestamp time.Time
 }
 
@@ -18,7 +18,7 @@ func NewMessage(clientID string, pk packets.Packet) *Message {
 	return &Message{
 		ClientID:  clientID,
 		Topic:     pk.TopicName,
-		Payload:   string(pk.Payload),
+		Payload:   pk.Payload,
 		Timestamp: time.Unix(pk.Created, 0),
 	}
 }

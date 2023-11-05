@@ -6,5 +6,7 @@ services:
     stdin_open: true
     tty: true
     volumes:
-      - ./../db_data/:/root/db/
-      
+      - ./../db:/root/db/
+    ports:
+      - '9000:9000'
+    restart: unless-stopped

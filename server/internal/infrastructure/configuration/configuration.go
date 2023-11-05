@@ -9,13 +9,20 @@ import (
 )
 
 type Configuration struct {
-	Mqtt    MqttConf    `yaml:"mqtt"`
-	Logging LoggingConf `yaml:"logging"`
+	Mqtt     MqttConf     `yaml:"mqtt"`
+	Database DatabaseConf `yaml:"database"`
+	Logging  LoggingConf  `yaml:"logging"`
 }
 
 type MqttConf struct {
 	Host string `yaml:"host" env:"mqtt" env-default:"localhost"`
 	Port int    `yaml:"port" env:"mqtt" env-default:"1883"`
+}
+
+type DatabaseConf struct {
+	Path          string `yaml:"path" env:"DATABASE_PATH"`
+	Name          string `yaml:"name" env:"DATABASE_NAME"`
+	MigrationPath string `yaml:"migrationPath" env:"DATABASE_MIGRATION_PATH"`
 }
 
 type LoggingConf struct {

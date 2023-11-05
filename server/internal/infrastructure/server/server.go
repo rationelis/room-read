@@ -34,8 +34,8 @@ func NewRoomReadServer(configuration *configuration.Configuration) (*RoomReadSer
 
 	slog.Info("Creating MQTT controller")
 	mqttController := mqtt.NewMQTTController(configuration, domainService)
-	hookWrapper := &HookWrapper{
-		controller: mqttController,
+	hookWrapper := &mqtt.HookWrapper{
+		Controller: mqttController,
 	}
 
 	err = server.AddHook(hookWrapper, map[string]any{})

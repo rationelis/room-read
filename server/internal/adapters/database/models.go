@@ -9,9 +9,9 @@ import (
 )
 
 type Message struct {
-	ID        interface{}
+	ID        int64
 	ClientID  string
 	Topic     string
-	Payload   string
+	Payload   []byte
 	Timestamp time.Time
 }

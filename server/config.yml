@@ -3,7 +3,9 @@ mqtt:
   port: 1883
 
 database:
-  path: "internal/adapters/database/database.db"
+  path: "db/room-read.db"
+  name: room-read
+  migrationPath: "migrations"
 
 logging:
   level: debug

@@ -2,8 +2,8 @@
 #include <WiFi.h>
 #include <PubSubClient.h>
 
-const char *SSID = nullptr;
-const char *PWD = nullptr;
+static const char* WIFI_SSID = ENV_WIFI_SSID;
+static const char* WIFI_PASSWORD = ENV_WIFI_PASSWORD;
 
 const char *SERVER = "192.168.178.214";
 const int PORT = 1883;
@@ -19,8 +19,8 @@ PubSubClient mqttClient(wifiClient);
 void connectToWiFi() {
   Serial.print("Connecting to ");
 
-  WiFi.begin(SSID, PWD);
-  Serial.print(SSID);
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  Serial.print(WIFI_SSID);
 
   while (WiFi.status() != WL_CONNECTED) {
     Serial.print(".");
@@ -52,10 +52,11 @@ void reconnect() {
 void setup() {
   Serial.begin(115200);
 
-  SSID = getenv("WIFI_SSID");
-  PWD = getenv("WIFI_PASSWORD");
+  Serial.print(WIFI_SSID);
+  Serial.print(" ");
+  Serial.println(WIFI_PASSWORD);
 
-  if (SSID == nullptr || PWD == nullptr) {
+  if (WIFI_SSID == nullptr || WIFI_PASSWORD == nullptr) {
     Serial.println("Error: SSID and password not set in environment variables.");
     while (1) {
       delay(1000);

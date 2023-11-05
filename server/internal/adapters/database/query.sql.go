@@ -7,6 +7,7 @@ package database
 
 import (
 	"context"
+	"time"
 )
 
 const listMessages = `-- name: listMessages :many
@@ -41,4 +42,28 @@ func (q *Queries) listMessages(ctx context.Context) ([]Message, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+const persistMessage = `-- name: persistMessage :one
+INSERT INTO message (client_id, topic, payload, timestamp)
+VALUES (?, ?, ?, ?) RETURNING id
+`
+
+type persistMessageParams struct {
+	ClientID  string
+	Topic     string
+	Payload   []byte
+	Timestamp time.Time
+}
+
+func (q *Queries) persistMessage(ctx context.Context, arg persistMessageParams) (int64, error) {
+	row := q.db.QueryRowContext(ctx, persistMessage,
+		arg.ClientID,
+		arg.Topic,
+		arg.Payload,
+		arg.Timestamp,
+	)
+	var id int64
+	err := row.Scan(&id)
+	return id, err
 }

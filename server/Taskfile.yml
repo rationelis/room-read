@@ -6,12 +6,18 @@ tasks:
   run:
     cmds:
       - go run cmd/room-read/room_read.go
+  run-migration:
+    cmds:
+      - go run cmd/room-read-migration/room-read-migration.go
   db-start:
     cmds:
       - docker-compose -f docker/docker-compose.yml up -d
   db-stop:
     cmds:
       - docker-compose -f docker/docker-compose.yml down
+  db-sh:
+    cmds:
+      - docker exec -it docker_sqlite3_1 sh
   test:
     cmds:
       - go test -v ./...
