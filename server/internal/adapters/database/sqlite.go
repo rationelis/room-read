@@ -7,11 +7,13 @@ import (
 	"room_read/internal/domain/model"
 	"room_read/internal/infrastructure/configuration"
 	"room_read/internal/infrastructure/logging"
+	"time"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
 type Database interface {
+	GetMessages(ctx context.Context) ([]*model.Message, error)
 	StoreMessage(ctx context.Context, message *model.Message) (*model.Message, error)
 }
 
@@ -65,4 +67,21 @@ func (d *database) StoreMessage(ctx context.Context, message *model.Message) (*m
 	}
 
 	return message, nil
+}
+
+func (d *database) GetMessages(ctx context.Context) ([]*model.Message, error) {
+	return []*model.Message{
+		{
+			ClientID:  "client1",
+			Topic:     "topic1",
+			Payload:   []byte("payload1"),
+			Timestamp: time.Now(),
+		},
+		{
+			ClientID:  "client2",
+			Topic:     "topic2",
+			Payload:   []byte("payload2"),
+			Timestamp: time.Now(),
+		},
+	}, nil
 }

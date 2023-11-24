@@ -3,10 +3,14 @@ package server
 import (
 	"fmt"
 	"log/slog"
+	"net/http"
+	"os"
 	"room_read/internal/adapters/database"
 	"room_read/internal/adapters/mqtt"
+	"room_read/internal/adapters/rest"
 	"room_read/internal/domain"
 	"room_read/internal/infrastructure/configuration"
+	"room_read/internal/infrastructure/logging"
 
 	mqtt_server "github.com/mochi-mqtt/server/v2"
 	"github.com/mochi-mqtt/server/v2/hooks/auth"
@@ -15,12 +19,16 @@ import (
 
 type RoomReadServer struct {
 	configuration.Configuration
-	server *mqtt_server.Server
+	mqttServer *mqtt_server.Server
+	httpServer *http.Server
 }
 
 func NewRoomReadServer(configuration *configuration.Configuration) (*RoomReadServer, error) {
-	server := mqtt_server.New(nil)
-	_ = server.AddHook(new(auth.AllowHook), nil)
+	err := logging.SetupLogger(*configuration)
+	if err != nil {
+		slog.Info("Could not setup logger")
+		os.Exit(1)
+	}
 
 	slog.Info("Connecting to database")
 	db, err := database.Connect(configuration)
@@ -38,7 +46,10 @@ func NewRoomReadServer(configuration *configuration.Configuration) (*RoomReadSer
 		Controller: mqttController,
 	}
 
-	err = server.AddHook(hookWrapper, map[string]any{})
+	mqttServer := mqtt_server.New(nil)
+	_ = mqttServer.AddHook(new(auth.AllowHook), nil)
+
+	err = mqttServer.AddHook(hookWrapper, map[string]any{})
 	if err != nil {
 		return nil, err
 	}
@@ -47,18 +58,35 @@ func NewRoomReadServer(configuration *configuration.Configuration) (*RoomReadSer
 	slog.Info("Setting up MQTT server", "port", connect)
 
 	tcp := listeners.NewTCP("t1", connect, nil)
-	err = server.AddListener(tcp)
+	err = mqttServer.AddListener(tcp)
 	if err != nil {
 		return nil, err
 	}
 
+	serverMux := http.NewServeMux()
+
+	slog.Info("Creating REST adapter")
+	restController := rest.NewRestController(*configuration, domainService)
+
+	serverMux.HandleFunc("/list", restController.RequestHandler)
+
+	server := &http.Server{
+		Addr:    fmt.Sprintf(":%d", configuration.Rest.Port),
+		Handler: serverMux,
+	}
+
 	return &RoomReadServer{
-		server: server,
+		mqttServer: mqttServer,
+		httpServer: server,
 	}, nil
 }
 
 func (s *RoomReadServer) Start() error {
-	err := s.server.Serve()
+	err := s.mqttServer.Serve()
+	if err != nil {
+		return err
+	}
+	err = s.httpServer.ListenAndServe()
 	if err != nil {
 		return err
 	}
@@ -66,7 +94,11 @@ func (s *RoomReadServer) Start() error {
 }
 
 func (s *RoomReadServer) Close() error {
-	err := s.server.Close()
+	err := s.mqttServer.Close()
+	if err != nil {
+		return err
+	}
+	err = s.httpServer.Close()
 	if err != nil {
 		return err
 	}

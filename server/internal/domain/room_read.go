@@ -19,3 +19,7 @@ func NewRoomReadServer(messageStore ports.StorePort) *RoomReadServer {
 func (s *RoomReadServer) ProcessMessage(ctx context.Context, message *model.Message) (*model.Message, error) {
 	return s.messageStore.StoreMessage(ctx, message)
 }
+
+func (s *RoomReadServer) GetMessages(ctx context.Context) ([]*model.Message, error) {
+	return s.messageStore.GetMessages(ctx)
+}

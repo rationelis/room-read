@@ -10,6 +10,7 @@ import (
 
 type Configuration struct {
 	Mqtt     MqttConf     `yaml:"mqtt"`
+	Rest     RestConf     `yaml:"rest"`
 	Database DatabaseConf `yaml:"database"`
 	Logging  LoggingConf  `yaml:"logging"`
 }
@@ -17,6 +18,11 @@ type Configuration struct {
 type MqttConf struct {
 	Host string `yaml:"host" env:"mqtt" env-default:"localhost"`
 	Port int    `yaml:"port" env:"mqtt" env-default:"1883"`
+}
+
+type RestConf struct {
+	Host string `yaml:"host" env:"rest" env-default:"localhost"`
+	Port int    `yaml:"port" env:"rest" env-default:"4444"`
 }
 
 type DatabaseConf struct {
