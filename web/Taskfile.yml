@@ -1,0 +1,11 @@
+# https://taskfile.dev
+
+version: "3"
+
+tasks:
+  build:
+    cmds:
+      - docker build --build-arg GIT_REVISION=$(git rev-parse HEAD) -t web -f docker/Dockerfile .
+  run:
+    cmds:
+      - docker run -t -i -p 8000:8000 web
