@@ -21,26 +21,26 @@ export default async function Page(_req: Request, ctx: RouteContext) {
   return (
     <div>
       <h1>Readings</h1>
-        <table>
-            <thead>
+      <table>
+        <thead>
+          <tr>
+            <th>ClientID</th>
+            <th>Topic</th>
+            <th>Payload</th>
+            <th>Timestamp</th>
+          </tr>
+        </thead>
+        <tbody>
+          {readings.map((reading) => (
             <tr>
-                <th>ClientID</th>
-                <th>Topic</th>
-                <th>Payload</th>
-                <th>Timestamp</th>
+              <td>{reading.ClientID}</td>
+              <td>{reading.Topic}</td>
+              <td>{reading.Payload}</td>
+              <td>{reading.Timestamp}</td>
             </tr>
-            </thead>
-            <tbody>
-            {readings.map((reading) => (
-                <tr>
-                <td>{reading.ClientID}</td>
-                <td>{reading.Topic}</td>
-                <td>{reading.Payload}</td>
-                <td>{reading.Timestamp}</td>
-                </tr>
-            ))}
-            </tbody>
-        </table>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
