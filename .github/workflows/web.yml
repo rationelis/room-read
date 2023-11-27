@@ -1,4 +1,4 @@
-name: Deno Fresh
+name: Web
 
 on:
   push:
